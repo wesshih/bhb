@@ -1,0 +1,5 @@
+# Ignoring only a handful of things
+
+*.pyc
+*.swp
+.DS_Store
