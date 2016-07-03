@@ -16,13 +16,16 @@ def makeSingleQ(data, start, stop, size, fields):
   query = 'SELECT ' + reduce(lambda x,y: str(x) + ', ' + str(y),fields) + ' FROM specObj WHERE'
   needOR = False # Need to add ORs for multiple BHBs after the first entry
   for d in data[start : stop]:
-    (ra,dec) = map(lambda x,y: (x[0]+y[0],x[1]+y[1]),[[d['RAJ2000']]*2,[d['DEJ2000']]*2],[[-1*size,size]]*2)
+    ra = (d['RAJ2000']-size,d['RAJ2000']+size)
+    dec = (d['DEJ2000']-size,d['DEJ2000']+size)
     if needOR: query += ' OR '
     else: needOR = True # will need it if there are any addition elems to add
     query += '((ra BETWEEN '+`ra[0]`+' AND '+`ra[1]`+') AND (dec BETWEEN '+`dec[0]`+' AND '+`dec[1]`+'))'
   return query
 
     # discarded lines from the function above
+    # this next line is soo unnecessarily complicated. keep it here for now because its funny
+    #(ra,dec) = map(lambda x,y: (x[0]+y[0],x[1]+y[1]),[[d['RAJ2000']]*2,[d['DEJ2000']]*2],[[-1*size,size]]*2)
     #ra = map(lambda x,y: x + y, (d['RAJ2000'], d['RAJ2000']), (-1 * size, size))
     #dec = map(lambda x,y: x + y, (d['DEJ2000'], d['DEJ2000']), (-1 * size, size))
 
@@ -31,7 +34,7 @@ def makeQArray(data, start, stop, step, size, fields):
   queries = []
   cur = start
   while cur < stop:
-    if (cur-start)%100==0: print 'Starting Query number '+`cur-start`+' of '+`stop-start`
+    #if (cur-start)%100==0: print 'Starting Query number '+`cur-start`+' of '+`stop-start`
     if stop - cur < step: step = stop - cur # on the last on, and step won't be filled fully
     queries.append(makeSingleQ(data, cur, cur + step, size, fields))
     cur += step
@@ -122,7 +125,7 @@ def main():
     start = int(sys.argv[1])
     stop = int(sys.argv[2])
     step = int(sys.argv[3])
-    print 'cmd start: ' +`start`+', stop: '+`stop`+', step: '+`step`
+    print 'cmd line args. start: ' +`start`+', stop: '+`stop`+', step: '+`step`
   
   # in theory there would be a better way to specify these values, and I'm sure there is a way to get the type
   # of the field without having to resort to just matching. for now though, it stays
@@ -140,7 +143,6 @@ def main():
   results = []
 
   t3 = curT()
-  #for i in range(len(queries)):
   for q in queries:
     if queries.index(q)%10 == 0: print 'Executing Query '+`queries.index(q)`+' of '+`len(queries)`
     results, modified = executeQ(q,results)
@@ -158,6 +160,7 @@ def main():
   print 'Time to match entries: '+`t6-t5`+' seconds'
 
   print len(res_tup[0])
+  print len(res_tup)
 
   hdus.close()
   print 'done'
