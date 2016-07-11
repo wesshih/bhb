@@ -28,12 +28,8 @@ def makeSingleQ(data, start, stop, size, fields):
     query += '((ra BETWEEN '+`ra[0]`+' AND '+`ra[1]`+') AND (dec BETWEEN '+`dec[0]`+' AND '+`dec[1]`+'))'
   return query
 
-    # discarded lines from the function above
     # this next line is soo unnecessarily complicated. keep it here for now because its funny
     #(ra,dec) = map(lambda x,y: (x[0]+y[0],x[1]+y[1]),[[d['RAJ2000']]*2,[d['DEJ2000']]*2],[[-1*size,size]]*2)
-    #ra = map(lambda x,y: x + y, (d['RAJ2000'], d['RAJ2000']), (-1 * size, size))
-    #dec = map(lambda x,y: x + y, (d['DEJ2000'], d['DEJ2000']), (-1 * size, size))
-
 
 def makeQArray(data, start, stop, step, size, fields):
   queries = []
@@ -103,7 +99,8 @@ def matchEntries(data, results, region):
 	results.remove(r)
 	break
 
-    map(lambda a,b: a.append(b), arr_tup,val_tup) # appends the values in val_tup to the arrays in arr_tup (may be -9999)
+    # appends the values in val_tup to the arrays in arr_tup (may be -9999)
+    map(lambda a,b: a.append(b), arr_tup,val_tup) 
     
     count += 1
 
@@ -124,7 +121,6 @@ def makeNewFits(filename, data, fields, formats, arr_tup):
     newCols.append(col)
 
   newColDefs = fits.ColDefs(newCols)
-
   oldCols = data.columns
 
   newHDU = fits.BinTableHDU.from_columns(oldCols + newColDefs)
@@ -138,6 +134,23 @@ def curT():
 def printNL(message):
   sys.stdout.write(message)
   sys.stdout.flush()
+
+def qPhoto(obj_IDs,fields):
+  query = 'SELECT ' + reduce(lambda x,y: str(x) + ', ' + str(y),fields) + ' FROM photoObj WHERE'
+  
+  '''
+def makeSingleQ(data, start, stop, size, fields):
+  if debug: print 'Making Single Query that starts at '+`start`+' and stops at '+`stop`
+  query = 'SELECT ' + reduce(lambda x,y: str(x) + ', ' + str(y),fields) + ' FROM specObj WHERE'
+  needOR = False # Need to add ORs for multiple BHBs after the first entry
+  for d in data[start : stop]:
+    ra = (d['RAJ2000']-size,d['RAJ2000']+size)
+    dec = (d['DEJ2000']-size,d['DEJ2000']+size)
+    if needOR: query += ' OR '
+    else: needOR = True # will need it if there are any addition elems to add
+    query += '((ra BETWEEN '+`ra[0]`+' AND '+`ra[1]`+') AND (dec BETWEEN '+`dec[0]`+' AND '+`dec[1]`+'))'
+  return query
+  '''
 
 def main():
   t_top = curT() #this is the time at the very top

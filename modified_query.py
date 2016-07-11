@@ -142,6 +142,10 @@ def printNL(message):
   sys.stdout.write(message)
   sys.stdout.flush()
 
+# this is using the method from Jester et al 2005
+def convert(bv):
+  return 1.02*bv - 0.22
+
 def main():
   t_top = curT() #this is the time at the very top
 
@@ -200,6 +204,11 @@ def main():
   res_tup = matchEntries(data,results,region_size)
   t_end = curT()
   printNL('\rMatching Entries\tdone' + (', in '+`t_end-t_start`+' seconds.\n' if timing else '.\n'))
+
+  grs = map(convert,res_tup[4])
+  res_tup = res_tup + tuple([grs])
+  fields.append('G-R_Conv')
+  formats.append(float)
 
   printNL('Creating New Fits...')
   t_start = curT()
