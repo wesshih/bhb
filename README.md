@@ -1,5 +1,4 @@
 # BHB
-7/13/16
 
 Some code to query and eventually analyze BHBs and dust in the CGM.
 
