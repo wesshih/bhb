@@ -1,5 +1,6 @@
-# bhb
+# BHB
 7/13/16
+
 Some code to query and eventually analyze BHBs and dust in the CGM.
 
 I make no promises as to the state of the code at any given time. Right now, there is no consistancy between any of the files, and its pretty disorganized. Once I've figured out more how I want to do things, I may attempt to make it presentable. 
