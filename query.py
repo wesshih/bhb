@@ -18,17 +18,16 @@ def isInRegion(ra, dec, ra_center, dec_center, size):
 
 def makeSingleQ(data, start, stop, size, fields):
   if debug: print 'Making Single Query that starts at '+`start`+' and stops at '+`stop`
-  #query = 'SELECT ' + reduce(lambda x,y: str(x) + ', ' + str(y),fields) + ' FROM specObj s, photoObj p WHERE s.bestObjID = p.objID AND ('
-  query = 'SELECT ' + reduce(lambda x,y: str(x) + ', ' + str(y),fields) + ' FROM specObj s, photoObj p WHERE ('
+  query = 'SELECT ' + reduce(lambda x,y: str(x) + ', ' + str(y),fields) + ' FROM specObj spec, photoObj photo, sppParams spp WHERE ('
   needOR = False # Need to add ORs for multiple BHBs after the first entry
   for d in data[start : stop]:
     ra = (d['RAJ2000']-size,d['RAJ2000']+size)
     dec = (d['DEJ2000']-size,d['DEJ2000']+size)
     if needOR: query += ' OR '
     else: needOR = True # will need it if there are any addition elems to add
-    query += '((s.ra BETWEEN '+`ra[0]`+' AND '+`ra[1]`+') AND (s.dec BETWEEN '+`dec[0]`+' AND '+`dec[1]`+'))'
+    query += '((spec.ra BETWEEN '+`ra[0]`+' AND '+`ra[1]`+') AND (spec.dec BETWEEN '+`dec[0]`+' AND '+`dec[1]`+'))'
   #query += ')'
-  query += ') AND s.bestObjID = p.objID'
+  query += ') AND spec.bestObjID = photo.objID AND spec.specObjID = spp.specObjID'
   return query
 
     # discarded lines from the function above
@@ -142,9 +141,19 @@ def printNL(message):
   sys.stdout.write(message)
   sys.stdout.flush()
 
-# this is using the method from Jester et al 2005
-def convert(bv):
-  return 1.02*bv - 0.22
+
+# reads a properly formatted file where the query fields are specified
+# each readline should return 'field,type\n'
+def readFieldsFile(filename):
+  form_dict = {'float':float,'int':int,'str':str}
+  f = open(filename,'r')
+  fields = []
+  formats = []
+  for l in f:
+    field,form = l[:-1].split(',')
+    fields.append(field)
+    formats.append(form_dict[form])
+  return (fields,formats)
 
 def main():
   t_top = curT() #this is the time at the very top
@@ -169,11 +178,8 @@ def main():
     stop = int(sys.argv[2])
     step = int(sys.argv[3])
     if debug: print 'cmd line args. start: ' +`start`+', stop: '+`stop`+', step: '+`step`
-  
-  # in theory there would be a better way to specify these values, and I'm sure there is a way to get the type
-  # of the field without having to resort to just matching. for now though, it stays
-  fields = ['s.ra','s.dec','s.specObjID','s.bestObjID','s.elodieBV','s.elodieTEff','s.elodieLogG','s.elodieFeH','s.elodieZ','s.elodieZErr', 's.elodieObject','s.elodieSpType','s.elodieFileName','p.objID','p.u','p.g','p.r','p.i','p.z','p.err_u','p.err_g','p.err_r','p.err_i','p.err_z','p.dered_u','p.dered_g','p.dered_r','p.dered_i','p.dered_z']
-  formats = [float,float,int,int,float,int,float,float,float,float,str,str,str,int,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float]
+
+  fields,formats = readFieldsFile('fields.txt')
 
   printNL('Creating Queries...')
   t_start = curT()
@@ -204,11 +210,6 @@ def main():
   res_tup = matchEntries(data,results,region_size)
   t_end = curT()
   printNL('\rMatching Entries\tdone' + (', in '+`t_end-t_start`+' seconds.\n' if timing else '.\n'))
-
-  grs = map(convert,res_tup[4])
-  res_tup = res_tup + tuple([grs])
-  fields.append('G-R_Conv')
-  formats.append(float)
 
   printNL('Creating New Fits...')
   t_start = curT()
