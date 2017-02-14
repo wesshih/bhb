@@ -1,0 +1,11 @@
+spec.ra,float
+spec.dec,float
+spec.specObjID,int
+spec.bestObjID,int
+photo.objID,int
+spp.TEFFIRFM,float
+spp.TEFFIRFMIND,int
+spp.LOGGNGS1IRFM,float
+spp.LOGGNGS1IRFMIND,int
+spp.FEHNGS1IRFM,float
+spp.FEHNGS1IRFMIND,int

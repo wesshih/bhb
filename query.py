@@ -100,8 +100,7 @@ def matchEntries(data, results, region):
       if isInRegion(r[0],r[1],d['RAJ2000'],d['DEJ2000'],region):
         # then these two points are the same
 
-        val_tup = r[0:numFields] #(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10])
-	#if count == 25: print val_tup
+        val_tup = r[0:numFields] #(r[0],r[1],r[2],r[3],...)
 	results.remove(r)
 	break
 
@@ -179,7 +178,7 @@ def main():
     step = int(sys.argv[3])
     if debug: print 'cmd line args. start: ' +`start`+', stop: '+`stop`+', step: '+`step`
 
-  fields,formats = readFieldsFile('fields.txt')
+  fields,formats = readFieldsFile('fields2.txt')
 
   printNL('Creating Queries...')
   t_start = curT()
@@ -213,7 +212,7 @@ def main():
 
   printNL('Creating New Fits...')
   t_start = curT()
-  makeNewFits('combined',data,fields,formats,res_tup)
+  makeNewFits('combined_2_13_17_part',data,fields,formats,res_tup)
   t_end = curT()
   printNL('\tdone' + (', in '+`t_end-t_start`+' seconds.\n' if timing else '.\n'))
 

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm queryText/*
+rm queryRes/*
+rm altQ/*

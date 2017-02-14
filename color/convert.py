@@ -66,3 +66,6 @@ print res[0:25]
 
 print sum(res)
 print (-2.5 * math.log(sum(res),10))
+
+print fluxes[0]
+print u_sen[0]
