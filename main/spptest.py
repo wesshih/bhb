@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import bhb
 
-unfil_bhbs = bhb.load('BHB_DATA_P_irfm.txt')
+unfil_bhbs = bhb.load('BHB_DATA_022317.txt')
 print(len(unfil_bhbs))
 bhbs = [b for b in unfil_bhbs if b.feh_annsr > -100 and b.feh_ngs1 > -100 and b.feh_irfm > -100]
 print(len(bhbs))

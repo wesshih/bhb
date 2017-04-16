@@ -1,123 +1,72 @@
 import util
 import bhb
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
 import numpy as np
 import sys
 import pickle
+from scipy import stats
 
-# this is a small program that quickly creates plots
-# it can do simple plots such as dif_gr vs d.
-# it is unable to do more complex plots like the 'dust free' plots, which require better filtering
-# this simply plots all the data, and possibly restricts the range
+class Plotter:
+  def __init__(self,x_var,y_var,x_min,x_max,y_min,y_max,cc=None):
+    self.x_var = x_var
+    self.x_min = x_min
+    self.x_max = x_max
 
+    self.y_var = y_var
+    self.y_min = y_min
+    self.y_max = y_max
 
-print 'Matplotlib loaded, starting graphing process'
+    temp_bhbs = bhb.load('BHB_DATA_022317.txt')
+    if cc is not None:
+        for c in cc:
+            var = c[0]
+            var_min = c[1]
+            var_max = c[2]
+            temp_bhbs = [b for b in temp_bhbs if b.__dict__[var] > var_min and b.__dict__[var] < var_max]
+    self.bhbs = np.array(temp_bhbs)
 
-# one x variable of course
-x_var = None
-x_min = None
-x_max = None
+    if x_var == 'number':
+        self.xs = range(len(self.bhbs))
+    else:
+        self.xs = [b.__dict__[self.x_var] for b in self.bhbs]
+    self.ys = []
+    for i in range(len(y_var)):
+        self.ys.append([b.__dict__[self.y_var[i]] for b in self.bhbs])
 
-# support more than 1 y variable
-num_y = 0
-y_var = []
-y_min = None
-y_max = None
+    self.colors = ['b','r','g','c','y']
 
-x_var = raw_input('x variable: ')
-if int(raw_input('define x range? ')) == 1:
-	x_min = float(raw_input('x min: '))
-	x_max = float(raw_input('x max: '))
+    # hacky stuff to make name for saving plot
+    # please ignore extra long lines
+    nameX = self.x_var + ('['+`self.x_min`+','+`self.x_max`+']' if self.x_min is not None and self.x_max is not None else '')
+    nameY = `self.y_var` + ('['+`self.y_min`+','+`self.y_max`+']' if self.y_min is not None and self.y_max is not None else '')
+    self.name = 'plots/' + nameX + '_VS_' + nameY
 
-num_y = int(raw_input('number of y variables: '))
+  def plot(self,save=False,trend=False):
+    plt.figure()
+    plotObject = plt.subplot(111)
+    for i in range(len(self.y_var)):
+        m,b,r,p,err = stats.linregress(self.xs,self.ys[i])
+        print 'm: ' + `m`
+        print 'b: ' + `b`
+        print 'r: ' + `r`
+        print 'p: ' + `p`
+        print 'err: ' + `err`
+        plt.scatter(self.xs,self.ys[i],marker='o',color=self.colors[i],edgecolor='black',alpha='0.5',label=self.y_var[i])
+        if trend:
+            plt.plot([min(self.xs),max(self.xs)],[min(self.xs)*m + b, max(self.xs)*m + b],color=self.colors[i],label='slope: '+`m`)
+    plt.xlabel(self.x_var)
+    plt.ylabel(self.y_var)
+    if self.x_min is not None and self.x_max is not None:
+    	plt.xlim(self.x_min, self.x_max)
+    if self.y_min is not None and self.y_max is not None:
+    	plt.ylim(self.y_min, self.y_max)
+    plt.legend(loc='center left', bbox_to_anchor=(1,0.5))
 
-while num_y > 5:
-	print 'only 5 y variables supported try again'
-	num_y = int(raw_input('number of y variables: '))
+    # save plot always for now
+    if save:
+        plt.savefig(self.name + '.png')
+        pickle.dump(plotObject, file(self.name + '.pickle','w'))
 
-for i in range(num_y):
-	y_var.append(raw_input('y'+`i`+' var: '))
-
-#y_var = raw_input('y variable: ')
-if int(raw_input('define y range? ')) == 1:
-	y_min = float(raw_input('y min: '))
-	y_max = float(raw_input('y max: '))
-
-'''
-# check cmd line arguments
-if len(sys.argv) < 5:
-	print 'Error: incorrect arguments. Please give at least x and y vars, and x and y indicators'
-	quit()
-else:
-	(x_var,y_var) = sys.argv[1:3]
-	if int(sys.argv[3]) != 0:
-		# x range specified
-		x_min = int(sys.argv[5])
-		x_max = int(sys.argv[6])
-		if int(sys.argv[4]) != 0:
-			# both x and y ranges specified
-			y_min = int(sys.argv[7])
-			y_max = int(sys.argv[8])
-	elif int(sys.argv[4]) != 0:
-		# x range is 0, but y range is not. so y range arg 5,6
-		y_min = int(sys.argv[5])
-		y_max = int(sys.argv[6])
-'''
-
-#now we should have the varialbes, and potentially the ranges.
-
-# load the BHBs
-bhbs = np.array(bhb.load('BHB_DATA.txt'))
-
-
-xs = [b.__dict__[x_var] for b in bhbs]
-ys = []
-for i in range(num_y):
-	ys.append([b.__dict__[y_var[i]] for b in bhbs])
-#ys = [b.__dict__[y_var] for b in bhbs]
-
-
-#ys2 = [y - 100 for y in ys]
-'''
-sub1 = plt.subplot(211)
-sub1.scatter(xs,ys)
-sub1.set_xlabel(x_var)
-sub1.set_ylabel(y_var)
-
-sub2 = plt.subplot(212)
-sub2.scatter(xs,ys,color='blue')
-sub2.set_xlabel(x_var)
-sub2.set_ylabel(y_var)
-sub2.scatter(xs,ys2,color='red')
-#sub2.set_xlim(0,10)
-#sub2.set_ylim(0,10)
-
-'''
-colors = ['blue','red','green','cyan','yellow']
-
-ax = plt.subplot(111)
-
-for i in range(num_y):
-	plt.scatter(xs,ys[i],marker='o',color=colors[i],edgecolor='black',alpha='0.5',label=y_var[i])
-
-#plt.scatter(xs,ys,marker='o',edgecolor='black',alpha=0.5)
-#plt.scatter(xs,ys2,marker='o',color=red,edgecolor='black',alpha=0.5)
-plt.xlabel(x_var)
-plt.ylabel(y_var)
-if x_min is not None and x_max is not None:
-	plt.xlim(x_min, x_max)
-if y_min is not None and y_max is not None:
-	plt.ylim(y_min, y_max)
-
-plt.legend()
-
-namex = x_var + ('['+`x_min`+','+`x_max`+']' if x_min is not None and x_max is not None else '') 
-namey = `y_var` + ('['+`y_min`+','+`y_max`+']' if y_min is not None and y_max is not None else '')
-name = 'plots/' + namex + '_VS_' + namey
-print name
-
-plt.savefig(name + '.png')
-
-pickle.dump(ax, file(name + '.pickle','w'))
-
-plt.show()
+    plt.show()

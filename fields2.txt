@@ -3,9 +3,9 @@ spec.dec,float
 spec.specObjID,int
 spec.bestObjID,int
 photo.objID,int
-spp.TEFFIRFM,float
-spp.TEFFIRFMIND,int
-spp.LOGGNGS1IRFM,float
-spp.LOGGNGS1IRFMIND,int
-spp.FEHNGS1IRFM,float
-spp.FEHNGS1IRFMIND,int
+spp.TEFFHA24,float
+spp.TEFFHA24IND,int
+spp.TEFFHA24UNC,float
+spp.TEFFHD24,float
+spp.TEFFHD24IND,int
+spp.TEFFHD24UNC,float

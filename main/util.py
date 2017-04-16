@@ -60,7 +60,7 @@ def filterInd(bhbs):
 # Python Shell Functions
 
 def getCombined():
-  return fits.open('combined_irfm.fits')[1].data
+  return fits.open('combined.fits')[1].data
 
 def getSight():
   return fits.open('Sightline.fits')[1].data

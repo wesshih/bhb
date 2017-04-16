@@ -3,9 +3,10 @@ import ast
 
 
 class BHB:
-  def __init__(self, data, fromFits=False):
+  def __init__(self, data, fits_names = None, fromFits=False):
     if fromFits: # create bhb from fits file
-      self.data = data
+      self.fits_data = data
+      self.fits_names = fits_names
       self.valid = True #This is the general flag to tell if good bhb
       self.objID = data['spec.bestObjID']
       self.glat = data['GLAT']
@@ -36,6 +37,30 @@ class BHB:
       self.logg_irfm = data['spp.LOGGNGS1IRFM']
       self.feh_irfm = data['spp.FEHNGS1IRFM']
 
+      # balmer series data
+      self.teff_ha24 = data['spp.TEFFHA24']
+      self.teff_hd24 = data['spp.TEFFHD24']
+
+      self.ha24_cont = data['lines.Halpha24cont']
+      self.ha24_side = data['lines.Halpha24side']
+      self.ha24_cont_gen_gr = 0.818 - 0.092*self.ha24_cont
+      self.ha24_side_gen_gr = 0.818 - 0.092*self.ha24_side
+      self.ha24_cont_gen_teff = 4133 + 371*self.ha24_cont
+      self.ha24_side_gen_teff = 4133 + 371*self.ha24_side
+      
+      self.hb24_cont = data['lines.Hbeta24cont']
+      self.hb24_side = data['lines.Hbeta24side']
+      
+      self.hg24_cont = data['lines.Hgamma24cont']
+      self.hg24_side = data['lines.Hgamma24side']
+      
+      self.hd24_cont = data['lines.Hdelta24cont']
+      self.hd24_side = data['lines.Hdelta24side']
+      self.hd24_cont_gen_gr = 0.469 - 0.058*self.hd24_cont
+      self.hd24_side_gen_gr = 0.469 - 0.058*self.hd24_side
+      self.hd24_cont_gen_teff = 5449 + 206*self.hd24_cont
+      self.hd24_side_gen_teff = 5449 + 206*self.hd24_side
+
       # observed u,g,r,i,z
       self.u = data['photo.u']
       self.g = data['photo.g']
@@ -62,11 +87,11 @@ class BHB:
       self.red_ri = self.dered_r - self.dered_i
       self.red_iz = self.dered_i - self.dered_z
 
-      # generated colors (right now only one model okay)
-      self.gen_ug = None
-      self.gen_gr = None # default value, as we haven't generated it yet
-      self.gen_ri = None
-      self.gen_iz = None
+      # generated colors for ANNRR SSPP
+      self.gen_ug_annrr = None
+      self.gen_gr_annrr = None # default value, as we haven't generated it yet
+      self.gen_ri_annrr = None
+      self.gen_iz_annrr = None
 
       # generated colors using different sppParams (keep to ug and gr for now)
       self.gen_ug_annsr = None
@@ -129,9 +154,19 @@ class BHB:
     self.dif_gr_irfm = self.gen_gr_irfm - self.obs_gr
 
 
+
 def load(filename='BHB_DATA.txt'):
+  print 'Loading BHBs from ' + filename
   bhbs = []
   f = open(filename,'r')
   for line in f:
     bhbs.append(BHB(ast.literal_eval(line)))
   return bhbs
+
+# save list of bhbs to text file
+def save(filename, bhbList):
+  print 'Saving BHBs to ' + filename
+  f = open(filename, 'w')
+  for b in bhbList:
+    f.write(str(b.__dict__) + '\n')
+  print 'Done Saving bhbList'

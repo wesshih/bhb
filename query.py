@@ -84,7 +84,8 @@ def matchEntries(data, results, region):
   numFields = len(results[0])
 
   # NOTE: in both arr_tup and val_tup, the names like arr_sID and bID are unnecessary,
-  # but are being kept around for the time being to maintain clarity
+  # but are being kept around for the time being to maintain clarity -> this is actually commented out, but here in case i forget what i was doing
+  # damn I'm going to have to do some serious clean up if i ever want to show this code to anybody
   #arr_tup = (arr_ra, arr_dec, arr_sID, arr_bID, arr_eBV, arr_eTEff, arr_eLogG, arr_eFeH, arr_eZ, arr_eZErr) = tuple([[] for i in range(11)])
   arr_tup = tuple([[] for i in range(numFields)])
   count = 0
@@ -101,8 +102,8 @@ def matchEntries(data, results, region):
         # then these two points are the same
 
         val_tup = r[0:numFields] #(r[0],r[1],r[2],r[3],...)
-	results.remove(r)
-	break
+        results.remove(r)
+        break
 
     map(lambda a,b: a.append(b), arr_tup,val_tup) # appends the values in val_tup to the arrays in arr_tup (may be -9999)
     

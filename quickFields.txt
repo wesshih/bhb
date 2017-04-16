@@ -1,0 +1,4 @@
+spec.specObjID,int
+spec.elodieTeff,float
+spec.elodieFeH,float
+spec.elodieLogG,float
